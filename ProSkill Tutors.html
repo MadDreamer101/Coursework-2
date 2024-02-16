@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- AbdulMateen Khawaja - M00851506 -->
+
+<head>
+    <title>ProSkil Tutors</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+    <script src="lessons.js"></script>
+    <script src="cart.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1>{{ storeName }}</h1>
+            <button @click="toggleCheckout" :disabled="!isCartEnabled">
+                {{ cartCount }}
+                <span class="fas fa-cart-plus"></span> Cart
+            </button>
+        </header>
+        <div>
+            <button @click="sortAscending">Sort Ascending</button>
+            <button @click="sortDescending">Sort Descending</button>
+        </div>
+        <div>
+            <label for="sortCriteria">Sort by:</label>
+            <select id="sortCriteria" v-model="selectedSortCriteria">
+                <option value="name">Name</option>
+                <option value="location">Location</option>
+                <option value="slots">Slots</option>
+                <option value="price">Price</option>
+            </select>
+            <button @click="sortProducts">Sort</button>
+        </div>
+        <main>
+            <!-- Product Page -->
+            <div v-if="showProduct">
+                <div class="product-container" v-for="product in currentProducts" :key="product.id">
+                    <figure>
+                        <img :src="product.image" width="250" height="250" alt="Product Image">
+                    </figure>
+                    <div class="product-details">
+                        <h2>{{ product.title }}</h2>
+                        <p>Price: {{ product.price }}</p>
+                        <p>Slots: {{ product.stock - getCartItemQuantity(product.id) }}</p>
+                        <button @click="addToCart(product)" :disabled="!canAddToCart(product)"
+                            :class="{ 'disabled-button': !canAddToCart(product) }">
+                            Add to cart
+                        </button>
+                        <span v-if="product.availableSlots === getCartItemQuantity(product.id)">
+                            All slots are full
+                        </span>
+                        <span v-else>
+                            BUY NOW!!
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Page -->
+            <cart v-else :cart-items="cart" :all-products="currentProducts" @checkout="openCheckoutModal"></cart>
+        </main>
+
+        <!-- Checkout Modal -->
+        <div v-if="isCheckoutModalVisible" class="modal">
+            <div class="modal-content">
+                <span class="close" @click="closeCheckoutModal">&times;</span>
+                <h2>Checkout</h2>
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" v-model="order.firstName" @input="validateName">
+                <label for="number">Phone Number:</label>
+                <input type="text" id="number" v-model="order.number" @input="validateNumber">
+                <button @click="completeCheckout">Complete Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        let store = new Vue({
+            el: '#app',
+            data: {
+                storeName: 'ProSkill Tutors',
+                showProduct: true,
+                order: {
+                    firstName: '',
+                    number: '',
+                },
+                products: [],
+                cart: [],
+                currentProducts: [], // New array for current products
+                selectedSortCriteria: 'name', // Default sorting criteria
+                isCheckoutModalVisible: false,
+            },
+            created() {
+                this.allProducts();
+            },
+            methods: {
+                addToCart(product) {
+                    const existingItem = this.cart.find(item => item.id === product.id);
+
+                    if (existingItem) {
+                        // If the product is already in the cart, increment the quantity
+                        existingItem.quantity++;
+                    } else {
+                        // If the product is not in the cart, add it with quantity 1
+                        this.cart.push({ ...product, quantity: 1 });
+                    }
+                },
+                toggleCheckout() {
+                    this.showProduct = !this.showProduct;
+                },
+                canAddToCart(product) {
+                    return product.availableSlots > this.getCartItemQuantity(product.id);
+                },
+                getCartItemQuantity(id) {
+                    const item = this.cart.find(cartItem => cartItem.id === id);
+                    return item ? item.quantity : 0;
+                },
+                getCartCount(id) {
+                    return this.cart.filter(item => item.id === id).length;
+                },
+                sortAscending() {
+                    this.currentProducts = [...this.products].sort((a, b) => a.title.localeCompare(b.title));
+                },
+                sortDescending() {
+                    this.currentProducts = [...this.products].sort((a, b) => b.title.localeCompare(a.title));
+                },
+                sortProducts() {
+                    switch (this.selectedSortCriteria) {
+                        case 'name':
+                            this.currentProducts = [...this.products].sort((a, b) => a.title.localeCompare(b.title));
+                            break;
+                        case 'location':
+                            this.currentProducts = [...this.products].sort((a, b) => a.title.split(' - ')[1].localeCompare(b.title.split(' - ')[1]));
+                            break;
+                        case 'slots':
+                            this.currentProducts = [...this.products].sort((a, b) => a.availableSlots - b.availableSlots);
+                            break;
+                        case 'price':
+                            this.currentProducts = [...this.products].sort((a, b) => a.price - b.price);
+                            break;
+                        default:
+                            break;
+                    }
+                },
+                validateName() {
+                    this.order.firstName = this.order.firstName.replace(/[^a-zA-Z]/g, '');
+                },
+                validateNumber() {
+                    this.order.number = this.order.number.replace(/[^0-9]/g, '');
+                },
+                openCheckoutModal() {
+                    this.isCheckoutModalVisible = true;
+                },
+                closeCheckoutModal() {
+                    this.isCheckoutModalVisible = false;
+                },
+                completeCheckout() {
+                    // Implement your checkout logic here
+                    // For example, you can display a confirmation message
+                    let orderInfo = {
+                        "FullName": this.order.firstName,
+                        "Number": this.order.number,
+                        "cart": this.cart
+                    };
+                    console.log(orderInfo);
+                    // fetch('http://localhost:3000/order/orders', {
+                    //     method: 'POST', // set the HTTP method as 'GET'
+                    //     headers: {
+                    //         'Content-Type': 'application/json', //set the data as JSON
+                    //     },
+                    //     body: JSON.stringify(orderInfo)
+                    // }).then(response)
+                    //     .then(console.log(response))
+                    //     .catch((error) => {
+                    //         console.log(error)
+                    //     });
+                    // alert('Checkout successful! Thank you for your purchase.');
+                    this.isCheckoutModalVisible = false;
+                },
+                allProducts() {
+                    fetch('http://localhost:3000/collection/products', {
+                        method: 'GET', // set the HTTP method as 'POST'
+                        headers: {
+                            'Content-Type': 'application/json', //set the data as JSON
+                        },
+                    }).then(response => response.json())
+                        .then(responseJSON => {
+                            this.products = responseJSON;
+                            console.log(responseJSON)
+                        })
+                        .catch((error) => {
+                            console.log(error)
+                        });
+                }
+
+            },
+            computed: {
+                cartCount() {
+                    return this.cart.length || '';
+                },
+                cartItems() {
+                    return this.cart;
+                },
+                isCartEnabled() {
+                    return this.cart.length > 0;
+                },
+            },
+            watch: {
+                products: {
+                    handler(newVal) {
+                        this.currentProducts = [...newVal];
+                    },
+                    deep: true,
+                },
+            },
+            mounted() {
+                this.currentProducts = [...this.products];
+            },
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button.disabled-button {
+    background-color: rgb(144, 185, 145); /* Change this to the desired color for disabled buttons */
+    cursor: not-allowed;
+}
+
+main {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+main > div {
+    flex: 1;
+    margin: 10px;
+    padding: 15px;
+    border: 1px solid #ddd;
+}
+
+.product-container {
+    display: flex;
+    align-items: flex-start;
+}
+
+figure {
+    margin-right: 20px;
+}
+
+figure img {
+    max-width: 100%;
+    height: auto;
+}
+
+.product-details {
+    flex: 1;
+    text-align: left;
+}
+
+button {
+    margin-top: 10px;
+}
+
+.cart-item {
+    display: flex;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.cart-item figure {
+    margin-right: 20px;
+}
+
+.cart-item figure img {
+    max-width: 100%;
+    height: auto;
+}
+
+.cart-item .product-details {
+    flex: 1;
+    text-align: left;
+}
